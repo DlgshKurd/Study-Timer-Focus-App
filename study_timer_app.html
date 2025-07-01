@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<!-- saved from url=(0059)file:///C:/Users/dlgsh/Downloads/study_timer_app%20(1).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus - Study Timer</title>
+    <title>Focus - Advanced Study Timer</title>
     <style>
         * {
             margin: 0;
@@ -41,10 +41,11 @@
             letter-spacing: -0.02em;
         }
 
-        .theme-selector {
+        .theme-controls {
             display: flex;
             gap: 0.5rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .theme-btn {
@@ -55,6 +56,7 @@
             font-weight: 500;
             transition: all 0.2s ease;
             backdrop-filter: blur(10px);
+            font-size: 0.9rem;
         }
 
         .theme-btn:hover {
@@ -62,17 +64,33 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
+        .save-theme-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+        }
+
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 300px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 2rem;
             flex: 1;
         }
 
-        .timer-section {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
+        .draggable-card {
+            cursor: move;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .draggable-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .draggable-card.dragging {
+            opacity: 0.8;
+            transform: rotate(5deg);
+            z-index: 1000;
         }
 
         .card {
@@ -82,11 +100,31 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             border: 1px solid rgba(255,255,255,0.2);
             transition: all 0.3s ease;
+            height: fit-content;
         }
 
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .drag-handle {
+            cursor: move;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            opacity: 0.5;
+            transition: opacity 0.2s ease;
+        }
+
+        .drag-handle:hover {
+            opacity: 1;
         }
 
         .timer-display {
@@ -100,6 +138,34 @@
             letter-spacing: -0.02em;
             margin-bottom: 0.5rem;
             font-variant-numeric: tabular-nums;
+            position: relative;
+            display: inline-block;
+        }
+
+        .timer-adjusters {
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .adjust-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .adjust-btn:hover {
+            transform: scale(1.1);
         }
 
         .timer-label {
@@ -113,6 +179,7 @@
             gap: 1rem;
             justify-content: center;
             margin-bottom: 2rem;
+            flex-wrap: wrap;
         }
 
         .timer-btn {
@@ -129,9 +196,27 @@
             transform: translateY(-2px);
         }
 
+        .custom-timer {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .time-input {
+            width: 60px;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
         .timer-presets {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             gap: 1rem;
         }
 
@@ -149,23 +234,15 @@
             transform: translateY(-2px);
         }
 
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .spotify-controls {
+        .music-player {
             text-align: center;
         }
 
-        .spotify-title {
-            font-size: 1.2rem;
-            font-weight: 600;
+        .music-controls {
             margin-bottom: 1rem;
         }
 
-        .spotify-btn {
+        .music-btn {
             width: 100%;
             padding: 0.75rem;
             border: none;
@@ -177,14 +254,28 @@
             backdrop-filter: blur(10px);
         }
 
-        .spotify-btn:hover {
+        .music-btn:hover {
             transform: translateY(-2px);
+        }
+
+        .music-btn.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .embedded-player {
+            width: 100%;
+            height: 200px;
+            border-radius: 0.75rem;
+            border: none;
+            margin-top: 1rem;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
+            margin-bottom: 1rem;
         }
 
         .stat-item {
@@ -203,6 +294,27 @@
         .stat-label {
             font-size: 0.875rem;
             opacity: 0.7;
+        }
+
+        .stats-controls {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .clear-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-1px);
         }
 
         .progress-ring {
@@ -241,6 +353,33 @@
             50% { transform: translateY(-100px) rotate(180deg); }
         }
 
+        .settings-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 2000;
+            display: none;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -250,111 +389,181 @@
                 font-size: 3rem;
             }
             
+            .timer-adjusters {
+                position: static;
+                transform: none;
+                flex-direction: row;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+            
             .container {
                 padding: 1rem;
             }
         }
-
-        /* Theme variables will be set by JavaScript */
     </style>
 </head>
-<body>
-    <div class="floating-elements" id="floatingElements"></div>
+<body style="background: linear-gradient(135deg, rgb(253, 203, 110) 0%, rgb(78, 205, 196) 100%); color: rgb(45, 55, 72);">
+    <div class="floating-elements" id="floatingElements"><div class="floating-element" style="left: 64.1877%; top: 85%; width: 53.1563px; height: 53.1563px; background: rgb(253, 203, 110); animation-delay: 15.8939s;"></div><div class="floating-element" style="left: 61.8508%; top: 93.8248%; width: 79.0782px; height: 79.0782px; background: rgb(253, 203, 110); animation-delay: 6.83717s;"></div><div class="floating-element" style="left: 41.0685%; top: 13.3805%; width: 46.5759px; height: 46.5759px; background: rgb(253, 203, 110); animation-delay: 1.40896s;"></div><div class="floating-element" style="left: 34.7889%; top: 54.1335%; width: 31.8927px; height: 31.8927px; background: rgb(253, 203, 110); animation-delay: 17.8572s;"></div><div class="floating-element" style="left: 19.5435%; top: 35.0619%; width: 57.9447px; height: 57.9447px; background: rgb(253, 203, 110); animation-delay: 14.5699s;"></div><div class="floating-element" style="left: 69.4013%; top: 16.4117%; width: 71.2592px; height: 71.2592px; background: rgb(253, 203, 110); animation-delay: 11.5064s;"></div><div class="floating-element" style="left: 8.0357%; top: 64.7605%; width: 25.0852px; height: 25.0852px; background: rgb(253, 203, 110); animation-delay: 15.6644s;"></div><div class="floating-element" style="left: 70.1537%; top: 32.7989%; width: 34.4169px; height: 34.4169px; background: rgb(253, 203, 110); animation-delay: 11.4522s;"></div></div>
+    <div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
     
     <div class="container">
         <header class="header">
-            <div class="logo">Focus</div>
-            <div class="theme-selector">
-                <button class="theme-btn" onclick="setTheme('ocean')">Ocean</button>
-                <button class="theme-btn" onclick="setTheme('sunset')">Sunset</button>
-                <button class="theme-btn" onclick="setTheme('forest')">Forest</button>
-                <button class="theme-btn" onclick="setTheme('space')">Space</button>
-                <button class="theme-btn" onclick="setTheme('random')">Random</button>
+            <div class="logo">Focus Pro</div>
+            <div class="theme-controls">
+                <button class="theme-btn" onclick="setTheme(&#39;ocean&#39;)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Ocean</button>
+                <button class="theme-btn" onclick="setTheme(&#39;sunset&#39;)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Sunset</button>
+                <button class="theme-btn" onclick="setTheme(&#39;forest&#39;)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Forest</button>
+                <button class="theme-btn" onclick="setTheme(&#39;space&#39;)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Space</button>
+                <button class="theme-btn" onclick="generateRandomTheme()" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Random</button>
+                <button class="theme-btn" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Test</button><button class="theme-btn" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">testttttt</button><button class="theme-btn save-theme-btn" onclick="saveCurrentTheme()">Save Theme</button>
             </div>
         </header>
 
-        <main class="main-content">
-            <div class="timer-section">
-                <div class="card">
+        <main class="main-content" id="mainContent">
+            <!-- Timer Card -->
+            
+
+            <!-- Music Player Card -->
+            
+
+            <!-- Stats Card -->
+            
+
+            <!-- Notes Card -->
+            <div class="draggable-card" data-card="timer" style="">
+                <div class="card" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72);">
+                    <div class="card-header">
+                        <div class="card-title">Pomodoro Timer</div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    
                     <div class="timer-display">
                         <svg class="progress-ring" id="progressRing">
-                            <circle class="progress-ring-circle" id="progressCircle" 
-                                    cx="60" cy="60" r="54" 
-                                    stroke="currentColor" 
-                                    stroke-dasharray="339.292" 
-                                    stroke-dashoffset="339.292">
+                            <circle class="progress-ring-circle" id="progressCircle" cx="60" cy="60" r="54" stroke="currentColor" stroke-dasharray="339.292" stroke-dashoffset="339.292" style="stroke: rgb(253, 203, 110); stroke-dashoffset: 339.292;">
                             </circle>
                         </svg>
-                        <div class="timer-time" id="timerDisplay">25:00</div>
+                        <div class="timer-time" id="timerDisplay">90:00
+                <div class="timer-adjusters">
+                    <button class="adjust-btn" onclick="adjustTimer(60)">+</button>
+                    <button class="adjust-btn" onclick="adjustTimer(-60)">-</button>
+                </div></div>
                         <div class="timer-label" id="timerLabel">Focus Time</div>
                     </div>
                     
+                    <div class="custom-timer">
+                        <input type="number" class="time-input" id="minutesInput" placeholder="25" min="1" max="120" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">
+                        <span>:</span>
+                        <input type="number" class="time-input" id="secondsInput" placeholder="00" min="0" max="59" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">
+                        <button class="timer-btn" onclick="setCustomTimer()" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Set</button>
+                    </div>
+                    
                     <div class="timer-controls">
-                        <button class="timer-btn" id="startBtn" onclick="toggleTimer()">Start</button>
-                        <button class="timer-btn" id="resetBtn" onclick="resetTimer()">Reset</button>
-                        <button class="timer-btn" id="skipBtn" onclick="skipSession()">Skip</button>
+                        <button class="timer-btn" id="startBtn" onclick="toggleTimer()" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Start</button>
+                        <button class="timer-btn" id="resetBtn" onclick="resetTimer()" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Reset</button>
+                        <button class="timer-btn" id="skipBtn" onclick="skipSession()" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Skip</button>
                     </div>
                     
                     <div class="timer-presets">
-                        <button class="preset-btn" onclick="setTimer(25)">25m</button>
-                        <button class="preset-btn" onclick="setTimer(15)">15m</button>
-                        <button class="preset-btn" onclick="setTimer(5)">5m</button>
-                        <button class="preset-btn" onclick="setTimer(45)">45m</button>
+                        <button class="preset-btn" onclick="setTimer(5)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">5m</button>
+                        <button class="preset-btn" onclick="setTimer(15)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">15m</button>
+                        <button class="preset-btn" onclick="setTimer(25)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">25m</button>
+                        <button class="preset-btn" onclick="setTimer(45)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">45m</button>
+                        <button class="preset-btn" onclick="setTimer(90)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">90m</button>
                     </div>
                 </div>
-            </div>
-
-            <div class="sidebar">
-                <div class="card">
-                    <div class="spotify-title">Study Playlist</div>
-                    <div class="spotify-controls">
-                        <button class="spotify-btn" onclick="openSpotify('lofi')">Lo-Fi Hip Hop</button>
-                        <button class="spotify-btn" onclick="openSpotify('classical')">Classical Focus</button>
-                        <button class="spotify-btn" onclick="openSpotify('ambient')">Ambient Sounds</button>
-                        <button class="spotify-btn" onclick="openSpotify('nature')">Nature Sounds</button>
-                        <button class="spotify-btn" onclick="openSpotify('binaural')">Binaural Beats</button>
+            </div><div class="draggable-card" data-card="stats" style="">
+                <div class="card" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72);">
+                    <div class="card-header">
+                        <div class="card-title">Study Statistics</div>
+                        <div class="drag-handle">⋮⋮</div>
                     </div>
-                </div>
-
-                <div class="card">
-                    <div class="spotify-title">Today's Stats</div>
+                    
                     <div class="stats-grid">
-                        <div class="stat-item">
+                        <div class="stat-item" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">
                             <div class="stat-number" id="focusCount">0</div>
                             <div class="stat-label">Focus Sessions</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-number" id="totalTime">0h</div>
+                        <div class="stat-item" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">
+                            <div class="stat-number" id="totalTime">0h 0m</div>
                             <div class="stat-label">Total Time</div>
                         </div>
-                        <div class="stat-item">
+                        <div class="stat-item" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">
                             <div class="stat-number" id="streak">0</div>
                             <div class="stat-label">Day Streak</div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-number" id="productivity">0%</div>
+                        <div class="stat-item" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">
+                            <div class="stat-number" id="productivity">0.4330429066614394%</div>
                             <div class="stat-label">Productivity</div>
                         </div>
                     </div>
+                    
+                    <div class="stats-controls">
+                        <button class="clear-btn" onclick="clearStats(&#39;session&#39;)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Clear Session</button>
+                        <button class="clear-btn" onclick="clearStats(&#39;all&#39;)" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Clear All</button>
+                        <button class="clear-btn" onclick="exportStats()" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72); border: 1px solid rgba(45, 55, 72, 0.7);">Export</button>
+                    </div>
                 </div>
             </div>
-        </main>
+        <div class="draggable-card" data-card="notes" style="">
+                <div class="card" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72);">
+                    <div class="card-header">
+                        <div class="card-title">Study Notes</div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    
+                    <textarea id="notesArea" placeholder="Write your study notes here..." style="width: 100%; height: 200px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(45, 55, 72, 0.7); border-radius: 0.75rem; padding: 1rem; resize: vertical; font-family: inherit; color: rgb(45, 55, 72);" oninput="saveNotes()">                    </textarea>
+                </div>
+            </div><div class="draggable-card" data-card="music" style="">
+                <div class="card" style="background: rgba(255, 255, 255, 0.15); color: rgb(45, 55, 72);">
+                    <div class="card-header">
+                        <div class="card-title">Music Player</div>
+                        <div class="drag-handle">⋮⋮</div>
+                    </div>
+                    
+                    <div class="music-player">
+                        <div class="music-controls">
+                            <button class="music-btn active" onclick="loadMusic(&#39;lofi&#39;)">Lo-Fi Hip Hop</button>
+                            <button class="music-btn" onclick="loadMusic(&#39;classical&#39;)">Classical Focus</button>
+                            <button class="music-btn" onclick="loadMusic(&#39;ambient&#39;)">Ambient Sounds</button>
+                            <button class="music-btn" onclick="loadMusic(&#39;rain&#39;)">Rain Sounds</button>
+                            <button class="music-btn" onclick="loadMusic(&#39;cafe&#39;)">Café Ambience</button>
+                        </div>
+                        
+                        <div id="musicPlayer">
+                    <iframe class="embedded-player" src="./Focus - Advanced Study Timer_files/jfKfPfyJRdk.html" frameborder="0" allow="autoplay; encrypted-media">
+                    </iframe>
+                </div>
+                    </div>
+                </div>
+            </div></main>
     </div>
 
     <script>
         // Timer functionality
         let timerInterval;
-        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let timeLeft = 25 * 60;
         let isRunning = false;
         let isBreak = false;
         let totalTime = timeLeft;
+        let currentTheme = null;
+        let savedThemes = JSON.parse(localStorage.getItem('savedThemes') || '[]');
         
         // Stats
         let stats = {
-            focusCount: 0,
-            totalTimeToday: 0,
-            streak: 0,
-            productivity: 0
+            focusCount: parseInt(localStorage.getItem('focusCount') || '0'),
+            totalTimeToday: parseInt(localStorage.getItem('totalTimeToday') || '0'),
+            streak: parseInt(localStorage.getItem('streak') || '0'),
+            productivity: parseInt(localStorage.getItem('productivity') || '75')
+        };
+
+        // Music URLs (using YouTube embeds as examples)
+        const musicSources = {
+            lofi: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&loop=1',
+            classical: 'https://www.youtube.com/embed/DWcJFNfaw9c?autoplay=1&loop=1',
+            ambient: 'https://www.youtube.com/embed/WebjqbIh7AU?autoplay=1&loop=1',
+            rain: 'https://www.youtube.com/embed/mPZkdNFkNps?autoplay=1&loop=1',
+            cafe: 'https://www.youtube.com/embed/DeumyOzKqgI?autoplay=1&loop=1'
         };
 
         // Themes
@@ -389,86 +598,100 @@
             }
         };
 
-        const randomThemes = [
-            {
-                background: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-                cardBg: 'rgba(255, 255, 255, 0.2)',
-                text: '#2d3748',
-                accent: '#ed8936',
-                secondary: 'rgba(45, 55, 72, 0.7)'
-            },
-            {
-                background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-                cardBg: 'rgba(255, 255, 255, 0.15)',
-                text: '#2d3748',
-                accent: '#38b2ac',
-                secondary: 'rgba(45, 55, 72, 0.7)'
-            },
-            {
-                background: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
-                cardBg: 'rgba(255, 255, 255, 0.15)',
-                text: '#2d3748',
-                accent: '#b794f6',
-                secondary: 'rgba(45, 55, 72, 0.7)'
-            },
-            {
-                background: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
-                cardBg: 'rgba(255, 255, 255, 0.1)',
-                text: '#ffffff',
-                accent: '#4299e1',
-                secondary: 'rgba(255, 255, 255, 0.8)'
-            },
-            {
-                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-                cardBg: 'rgba(255, 255, 255, 0.15)',
-                text: '#2d3748',
-                accent: '#f56565',
-                secondary: 'rgba(45, 55, 72, 0.7)'
-            }
-        ];
+        function generateRandomTheme() {
+            const colors = [
+                '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57',
+                '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43',
+                '#6c5ce7', '#fd79a8', '#fdcb6e', '#a29bfe', '#e17055',
+                '#00b894', '#e84393', '#74b9ff', '#fd79a8', '#fdcb6e'
+            ];
+            
+            const bg1 = colors[Math.floor(Math.random() * colors.length)];
+            const bg2 = colors[Math.floor(Math.random() * colors.length)];
+            const accent = colors[Math.floor(Math.random() * colors.length)];
+            
+            const brightness = Math.random() > 0.5 ? 'light' : 'dark';
+            const textColor = brightness === 'light' ? '#2d3748' : '#ffffff';
+            const cardBg = brightness === 'light' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.08)';
+            const secondary = brightness === 'light' ? 'rgba(45, 55, 72, 0.7)' : 'rgba(255, 255, 255, 0.7)';
+            
+            currentTheme = {
+                background: `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`,
+                cardBg: cardBg,
+                text: textColor,
+                accent: accent,
+                secondary: secondary,
+                name: `Random Theme ${Date.now()}`
+            };
+            
+            applyTheme(currentTheme);
+        }
 
         function setTheme(themeName) {
-            let theme;
-            if (themeName === 'random') {
-                theme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
-            } else {
-                theme = themes[themeName];
-            }
+            currentTheme = { ...themes[themeName], name: themeName };
+            applyTheme(currentTheme);
+        }
 
+        function applyTheme(theme) {
             document.body.style.background = theme.background;
             document.body.style.color = theme.text;
             
-            // Update CSS custom properties
-            document.documentElement.style.setProperty('--card-bg', theme.cardBg);
-            document.documentElement.style.setProperty('--text-color', theme.text);
-            document.documentElement.style.setProperty('--accent-color', theme.accent);
-            document.documentElement.style.setProperty('--secondary-color', theme.secondary);
-
-            // Update all cards and buttons
             const cards = document.querySelectorAll('.card');
             cards.forEach(card => {
                 card.style.background = theme.cardBg;
                 card.style.color = theme.text;
             });
 
-            const buttons = document.querySelectorAll('.theme-btn, .timer-btn, .preset-btn, .spotify-btn, .stat-item');
+            const buttons = document.querySelectorAll('.theme-btn, .timer-btn, .preset-btn, .music-btn, .stat-item, .clear-btn, .adjust-btn, .time-input');
             buttons.forEach(btn => {
-                btn.style.background = theme.cardBg;
-                btn.style.color = theme.text;
-                btn.style.border = `1px solid ${theme.secondary}`;
+                if (!btn.classList.contains('save-theme-btn') && !btn.classList.contains('music-btn')) {
+                    btn.style.background = theme.cardBg;
+                    btn.style.color = theme.text;
+                    btn.style.border = `1px solid ${theme.secondary}`;
+                }
             });
 
             // Update progress ring
             document.getElementById('progressCircle').style.stroke = theme.accent;
+            
+            // Update notes area
+            const notesArea = document.getElementById('notesArea');
+            notesArea.style.background = theme.cardBg;
+            notesArea.style.color = theme.text;
+            notesArea.style.border = `1px solid ${theme.secondary}`;
 
             createFloatingElements(theme.accent);
+        }
+
+        function saveCurrentTheme() {
+            if (!currentTheme) return;
+            
+            const themeName = prompt('Enter a name for this theme:', currentTheme.name || 'My Theme');
+            if (themeName) {
+                currentTheme.name = themeName;
+                savedThemes.push(currentTheme);
+                localStorage.setItem('savedThemes', JSON.stringify(savedThemes));
+                
+                // Add button for saved theme
+                const themeControls = document.querySelector('.theme-controls');
+                const saveBtn = themeControls.querySelector('.save-theme-btn');
+                
+                const newBtn = document.createElement('button');
+                newBtn.className = 'theme-btn';
+                newBtn.textContent = themeName;
+                newBtn.onclick = () => applyTheme(currentTheme);
+                
+                themeControls.insertBefore(newBtn, saveBtn);
+                
+                alert('Theme saved successfully!');
+            }
         }
 
         function createFloatingElements(color) {
             const container = document.getElementById('floatingElements');
             container.innerHTML = '';
             
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 8; i++) {
                 const element = document.createElement('div');
                 element.className = 'floating-element';
                 element.style.left = Math.random() * 100 + '%';
@@ -484,14 +707,24 @@
         function updateDisplay() {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
-            document.getElementById('timerDisplay').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerDisplay').innerHTML = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}
+                <div class="timer-adjusters">
+                    <button class="adjust-btn" onclick="adjustTimer(60)">+</button>
+                    <button class="adjust-btn" onclick="adjustTimer(-60)">-</button>
+                </div>`;
             
             // Update progress ring
             const progress = (totalTime - timeLeft) / totalTime;
             const circumference = 2 * Math.PI * 54;
             const offset = circumference - (progress * circumference);
             document.getElementById('progressCircle').style.strokeDashoffset = offset;
+        }
+
+        function adjustTimer(seconds) {
+            timeLeft = Math.max(0, timeLeft + seconds);
+            totalTime = Math.max(totalTime, timeLeft);
+            updateDisplay();
         }
 
         function toggleTimer() {
@@ -530,6 +763,21 @@
             updateDisplay();
         }
 
+        function setCustomTimer() {
+            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+            const totalSeconds = (minutes * 60) + seconds;
+            
+            if (totalSeconds > 0) {
+                clearInterval(timerInterval);
+                timeLeft = totalSeconds;
+                totalTime = timeLeft;
+                isRunning = false;
+                document.getElementById('startBtn').textContent = 'Start';
+                updateDisplay();
+            }
+        }
+
         function skipSession() {
             completeSession();
         }
@@ -541,8 +789,7 @@
             if (!isBreak) {
                 stats.focusCount++;
                 stats.totalTimeToday += Math.floor(totalTime / 60);
-                document.getElementById('focusCount').textContent = stats.focusCount;
-                document.getElementById('totalTime').textContent = Math.floor(stats.totalTimeToday / 60) + 'h';
+                updateStats();
                 
                 // Switch to break
                 isBreak = true;
@@ -556,36 +803,257 @@
             }
             
             document.getElementById('startBtn').textContent = 'Start';
+            saveStats();
             
-            // Play notification sound (placeholder)
-            console.log('Session complete!');
-        }
-
-        function openSpotify(playlist) {
-            const playlists = {
-                lofi: 'https://open.spotify.com/playlist/0vvXsWCC9xrXsKd4FyS8kM',
-                classical: 'https://open.spotify.com/playlist/37i9dQZF1DWWEJlAGA9gs0',
-                ambient: 'https://open.spotify.com/playlist/37i9dQZF1DX3Ogo9pFvBkY',
-                nature: 'https://open.spotify.com/playlist/37i9dQZF1DXbHcQpOiXk1D',
-                binaural: 'https://open.spotify.com/playlist/37i9dQZF1DX7EF8wVZvnya'
-            };
-            
-            if (playlists[playlist]) {
-                window.open(playlists[playlist], '_blank');
+            // Notification
+            if (Notification.permission === 'granted') {
+                new Notification('Session Complete!', {
+                    body: isBreak ? 'Time for a break!' : 'Ready for focus time!',
+                    icon: '/favicon.ico'
+                });
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setTheme('ocean');
-            updateDisplay();
+        function loadMusic(type) {
+            const musicPlayer = document.getElementById('musicPlayer');
+            const musicBtns = document.querySelectorAll('.music-btn');
             
-            // Initialize stats
-            stats.streak = Math.floor(Math.random() * 7) + 1;
-            stats.productivity = Math.floor(Math.random() * 40) + 60;
+            // Remove active class from all buttons
+            musicBtns.forEach(btn => btn.classList.remove('active'));
+            
+            if (musicSources[type]) {
+                musicPlayer.innerHTML = `
+                    <iframe class="embedded-player" 
+                            src="${musicSources[type]}" 
+                            frameborder="0" 
+                            allow="autoplay; encrypted-media">
+                    </iframe>
+                `;
+                
+                // Add active class to clicked button
+                event.target.classList.add('active');
+            }
+        }
+
+        function clearStats(type) {
+            if (type === 'session') {
+                stats.focusCount = 0;
+                stats.totalTimeToday = 0;
+            } else if (type === 'all') {
+                if (confirm('Are you sure you want to clear all statistics?')) {
+                    stats = {
+                        focusCount: 0,
+                        totalTimeToday: 0,
+                        streak: 0,
+                        productivity: 0
+                    };
+                }
+            }
+            updateStats();
+            saveStats();
+        }
+
+        function exportStats() {
+            const data = {
+                stats: stats,
+                exportDate: new Date().toISOString(),
+                notes: document.getElementById('notesArea').value
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `focus-stats-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function updateStats() {
+            document.getElementById('focusCount').textContent = stats.focusCount;
+            document.getElementById('totalTime').textContent = Math.floor(stats.totalTimeToday / 60) + 'h ' + (stats.totalTimeToday % 60) + 'm';
             document.getElementById('streak').textContent = stats.streak;
             document.getElementById('productivity').textContent = stats.productivity + '%';
+        }
+
+        function saveStats() {
+            Object.keys(stats).forEach(key => {
+                localStorage.setItem(key, stats[key]);
+            });
+        }
+
+        function saveNotes() {
+            localStorage.setItem('studyNotes', document.getElementById('notesArea').value);
+        }
+
+        function loadNotes() {
+            const savedNotes = localStorage.getItem('studyNotes');
+            if (savedNotes) {
+                document.getElementById('notesArea').value = savedNotes;
+            }
+        }
+
+        // Drag and Drop functionality
+        let draggedElement = null;
+        let dragOffset = { x: 0, y: 0 };
+
+        function initDragAndDrop() {
+            const draggableCards = document.querySelectorAll('.draggable-card');
+            
+            draggableCards.forEach(card => {
+                const dragHandle = card.querySelector('.drag-handle');
+                
+                dragHandle.addEventListener('mousedown', (e) => {
+                    draggedElement = card;
+                    const rect = card.getBoundingClientRect();
+                    dragOffset.x = e.clientX - rect.left;
+                    dragOffset.y = e.clientY - rect.top;
+                    
+                    card.classList.add('dragging');
+                    document.addEventListener('mousemove', handleDrag);
+                    document.addEventListener('mouseup', handleDragEnd);
+                    e.preventDefault();
+                });
+            });
+        }
+
+        function handleDrag(e) {
+            if (!draggedElement) return;
+            
+            const container = document.getElementById('mainContent');
+            const containerRect = container.getBoundingClientRect();
+            
+            const x = e.clientX - containerRect.left - dragOffset.x;
+            const y = e.clientY - containerRect.top - dragOffset.y;
+            
+            draggedElement.style.position = 'absolute';
+            draggedElement.style.left = Math.max(0, Math.min(x, containerRect.width - draggedElement.offsetWidth)) + 'px';
+            draggedElement.style.top = Math.max(0, Math.min(y, containerRect.height - draggedElement.offsetHeight)) + 'px';
+            draggedElement.style.zIndex = '1000';
+        }
+
+        function handleDragEnd() {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                
+                // Find the best position in the grid
+                const container = document.getElementById('mainContent');
+                const allCards = Array.from(container.querySelectorAll('.draggable-card'));
+                const draggedRect = draggedElement.getBoundingClientRect();
+                
+                // Reset position to allow grid reflow
+                draggedElement.style.position = '';
+                draggedElement.style.left = '';
+                draggedElement.style.top = '';
+                draggedElement.style.zIndex = '';
+                
+                // Reorder cards based on position
+                let insertBefore = null;
+                allCards.forEach(card => {
+                    if (card !== draggedElement) {
+                        const cardRect = card.getBoundingClientRect();
+                        if (draggedRect.left < cardRect.left + cardRect.width / 2 && 
+                            draggedRect.top < cardRect.top + cardRect.height / 2) {
+                            insertBefore = card;
+                        }
+                    }
+                });
+                
+                if (insertBefore) {
+                    container.insertBefore(draggedElement, insertBefore);
+                } else {
+                    container.appendChild(draggedElement);
+                }
+                
+                draggedElement = null;
+            }
+            
+            document.removeEventListener('mousemove', handleDrag);
+            document.removeEventListener('mouseup', handleDragEnd);
+        }
+
+        // Touch support for mobile drag and drop
+        function initTouchDragAndDrop() {
+            const draggableCards = document.querySelectorAll('.draggable-card');
+            
+            draggableCards.forEach(card => {
+                const dragHandle = card.querySelector('.drag-handle');
+                
+                dragHandle.addEventListener('touchstart', (e) => {
+                    draggedElement = card;
+                    const rect = card.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    dragOffset.x = touch.clientX - rect.left;
+                    dragOffset.y = touch.clientY - rect.top;
+                    
+                    card.classList.add('dragging');
+                    document.addEventListener('touchmove', handleTouchDrag);
+                    document.addEventListener('touchend', handleTouchDragEnd);
+                    e.preventDefault();
+                });
+            });
+        }
+
+        function handleTouchDrag(e) {
+            if (!draggedElement) return;
+            
+            const container = document.getElementById('mainContent');
+            const containerRect = container.getBoundingClientRect();
+            const touch = e.touches[0];
+            
+            const x = touch.clientX - containerRect.left - dragOffset.x;
+            const y = touch.clientY - containerRect.top - dragOffset.y;
+            
+            draggedElement.style.position = 'absolute';
+            draggedElement.style.left = Math.max(0, Math.min(x, containerRect.width - draggedElement.offsetWidth)) + 'px';
+            draggedElement.style.top = Math.max(0, Math.min(y, containerRect.height - draggedElement.offsetHeight)) + 'px';
+            draggedElement.style.zIndex = '1000';
+            
+            e.preventDefault();
+        }
+
+        function handleTouchDragEnd() {
+            handleDragEnd();
+            document.removeEventListener('touchmove', handleTouchDrag);
+            document.removeEventListener('touchend', handleTouchDragEnd);
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
+            // Load saved themes
+            savedThemes.forEach(theme => {
+                const themeControls = document.querySelector('.theme-controls');
+                const saveBtn = themeControls.querySelector('.save-theme-btn');
+                
+                const newBtn = document.createElement('button');
+                newBtn.className = 'theme-btn';
+                newBtn.textContent = theme.name;
+                newBtn.onclick = () => applyTheme(theme);
+                
+                themeControls.insertBefore(newBtn, saveBtn);
+            });
+            
+            // Initialize
+            setTheme('ocean');
+            updateDisplay();
+            updateStats();
+            loadNotes();
+            initDragAndDrop();
+            initTouchDragAndDrop();
+            
+            // Update productivity randomly for demo
+            setInterval(() => {
+                if (isRunning) {
+                    stats.productivity = Math.min(100, stats.productivity + Math.random() * 2);
+                    updateStats();
+                }
+            }, 30000);
         });
     </script>
-</body>
-</html>
+
+</body></html>
