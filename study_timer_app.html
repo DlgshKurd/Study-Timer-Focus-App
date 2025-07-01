@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus - Study Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .theme-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        .timer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .card {
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .timer-display {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .timer-time {
+            font-size: 4rem;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-label {
+            font-size: 1.1rem;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .timer-btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .timer-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .timer-presets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .preset-btn {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .preset-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .spotify-controls {
+            text-align: center;
+        }
+
+        .spotify-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .spotify-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .spotify-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.7;
+        }
+
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-100px) rotate(180deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .timer-time {
+                font-size: 3rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        /* Theme variables will be set by JavaScript */
+    </style>
+</head>
+<body>
+    <div class="floating-elements" id="floatingElements"></div>
+    
+    <div class="container">
+        <header class="header">
+            <div class="logo">Focus</div>
+            <div class="theme-selector">
+                <button class="theme-btn" onclick="setTheme('ocean')">Ocean</button>
+                <button class="theme-btn" onclick="setTheme('sunset')">Sunset</button>
+                <button class="theme-btn" onclick="setTheme('forest')">Forest</button>
+                <button class="theme-btn" onclick="setTheme('space')">Space</button>
+                <button class="theme-btn" onclick="setTheme('random')">Random</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="timer-section">
+                <div class="card">
+                    <div class="timer-display">
+                        <svg class="progress-ring" id="progressRing">
+                            <circle class="progress-ring-circle" id="progressCircle" 
+                                    cx="60" cy="60" r="54" 
+                                    stroke="currentColor" 
+                                    stroke-dasharray="339.292" 
+                                    stroke-dashoffset="339.292">
+                            </circle>
+                        </svg>
+                        <div class="timer-time" id="timerDisplay">25:00</div>
+                        <div class="timer-label" id="timerLabel">Focus Time</div>
+                    </div>
+                    
+                    <div class="timer-controls">
+                        <button class="timer-btn" id="startBtn" onclick="toggleTimer()">Start</button>
+                        <button class="timer-btn" id="resetBtn" onclick="resetTimer()">Reset</button>
+                        <button class="timer-btn" id="skipBtn" onclick="skipSession()">Skip</button>
+                    </div>
+                    
+                    <div class="timer-presets">
+                        <button class="preset-btn" onclick="setTimer(25)">25m</button>
+                        <button class="preset-btn" onclick="setTimer(15)">15m</button>
+                        <button class="preset-btn" onclick="setTimer(5)">5m</button>
+                        <button class="preset-btn" onclick="setTimer(45)">45m</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <div class="spotify-title">Study Playlist</div>
+                    <div class="spotify-controls">
+                        <button class="spotify-btn" onclick="openSpotify('lofi')">Lo-Fi Hip Hop</button>
+                        <button class="spotify-btn" onclick="openSpotify('classical')">Classical Focus</button>
+                        <button class="spotify-btn" onclick="openSpotify('ambient')">Ambient Sounds</button>
+                        <button class="spotify-btn" onclick="openSpotify('nature')">Nature Sounds</button>
+                        <button class="spotify-btn" onclick="openSpotify('binaural')">Binaural Beats</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="spotify-title">Today's Stats</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="focusCount">0</div>
+                            <div class="stat-label">Focus Sessions</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="totalTime">0h</div>
+                            <div class="stat-label">Total Time</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="streak">0</div>
+                            <div class="stat-label">Day Streak</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="productivity">0%</div>
+                            <div class="stat-label">Productivity</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Timer functionality
+        let timerInterval;
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let isRunning = false;
+        let isBreak = false;
+        let totalTime = timeLeft;
+        
+        // Stats
+        let stats = {
+            focusCount: 0,
+            totalTimeToday: 0,
+            streak: 0,
+            productivity: 0
+        };
+
+        // Themes
+        const themes = {
+            ocean: {
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.1)',
+                text: '#ffffff',
+                accent: '#4facfe',
+                secondary: 'rgba(255, 255, 255, 0.8)'
+            },
+            sunset: {
+                background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.2)',
+                text: '#2d3748',
+                accent: '#ff6b6b',
+                secondary: 'rgba(45, 55, 72, 0.7)'
+            },
+            forest: {
+                background: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.1)',
+                text: '#ffffff',
+                accent: '#48bb78',
+                secondary: 'rgba(255, 255, 255, 0.8)'
+            },
+            space: {
+                background: 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.05)',
+                text: '#ffffff',
+                accent: '#805ad5',
+                secondary: 'rgba(255, 255, 255, 0.7)'
+            }
+        };
+
+        const randomThemes = [
+            {
+                background: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.2)',
+                text: '#2d3748',
+                accent: '#ed8936',
+                secondary: 'rgba(45, 55, 72, 0.7)'
+            },
+            {
+                background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.15)',
+                text: '#2d3748',
+                accent: '#38b2ac',
+                secondary: 'rgba(45, 55, 72, 0.7)'
+            },
+            {
+                background: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.15)',
+                text: '#2d3748',
+                accent: '#b794f6',
+                secondary: 'rgba(45, 55, 72, 0.7)'
+            },
+            {
+                background: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.1)',
+                text: '#ffffff',
+                accent: '#4299e1',
+                secondary: 'rgba(255, 255, 255, 0.8)'
+            },
+            {
+                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                cardBg: 'rgba(255, 255, 255, 0.15)',
+                text: '#2d3748',
+                accent: '#f56565',
+                secondary: 'rgba(45, 55, 72, 0.7)'
+            }
+        ];
+
+        function setTheme(themeName) {
+            let theme;
+            if (themeName === 'random') {
+                theme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
+            } else {
+                theme = themes[themeName];
+            }
+
+            document.body.style.background = theme.background;
+            document.body.style.color = theme.text;
+            
+            // Update CSS custom properties
+            document.documentElement.style.setProperty('--card-bg', theme.cardBg);
+            document.documentElement.style.setProperty('--text-color', theme.text);
+            document.documentElement.style.setProperty('--accent-color', theme.accent);
+            document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+
+            // Update all cards and buttons
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.style.background = theme.cardBg;
+                card.style.color = theme.text;
+            });
+
+            const buttons = document.querySelectorAll('.theme-btn, .timer-btn, .preset-btn, .spotify-btn, .stat-item');
+            buttons.forEach(btn => {
+                btn.style.background = theme.cardBg;
+                btn.style.color = theme.text;
+                btn.style.border = `1px solid ${theme.secondary}`;
+            });
+
+            // Update progress ring
+            document.getElementById('progressCircle').style.stroke = theme.accent;
+
+            createFloatingElements(theme.accent);
+        }
+
+        function createFloatingElements(color) {
+            const container = document.getElementById('floatingElements');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 6; i++) {
+                const element = document.createElement('div');
+                element.className = 'floating-element';
+                element.style.left = Math.random() * 100 + '%';
+                element.style.top = Math.random() * 100 + '%';
+                element.style.width = (Math.random() * 60 + 20) + 'px';
+                element.style.height = element.style.width;
+                element.style.background = color;
+                element.style.animationDelay = Math.random() * 20 + 's';
+                container.appendChild(element);
+            }
+        }
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update progress ring
+            const progress = (totalTime - timeLeft) / totalTime;
+            const circumference = 2 * Math.PI * 54;
+            const offset = circumference - (progress * circumference);
+            document.getElementById('progressCircle').style.strokeDashoffset = offset;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                document.getElementById('startBtn').textContent = 'Start';
+                isRunning = false;
+            } else {
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        completeSession();
+                    }
+                }, 1000);
+                document.getElementById('startBtn').textContent = 'Pause';
+                isRunning = true;
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = totalTime;
+            isRunning = false;
+            document.getElementById('startBtn').textContent = 'Start';
+            updateDisplay();
+        }
+
+        function setTimer(minutes) {
+            clearInterval(timerInterval);
+            timeLeft = minutes * 60;
+            totalTime = timeLeft;
+            isRunning = false;
+            document.getElementById('startBtn').textContent = 'Start';
+            updateDisplay();
+        }
+
+        function skipSession() {
+            completeSession();
+        }
+
+        function completeSession() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            
+            if (!isBreak) {
+                stats.focusCount++;
+                stats.totalTimeToday += Math.floor(totalTime / 60);
+                document.getElementById('focusCount').textContent = stats.focusCount;
+                document.getElementById('totalTime').textContent = Math.floor(stats.totalTimeToday / 60) + 'h';
+                
+                // Switch to break
+                isBreak = true;
+                setTimer(5);
+                document.getElementById('timerLabel').textContent = 'Break Time';
+            } else {
+                // Switch back to focus
+                isBreak = false;
+                setTimer(25);
+                document.getElementById('timerLabel').textContent = 'Focus Time';
+            }
+            
+            document.getElementById('startBtn').textContent = 'Start';
+            
+            // Play notification sound (placeholder)
+            console.log('Session complete!');
+        }
+
+        function openSpotify(playlist) {
+            const playlists = {
+                lofi: 'https://open.spotify.com/playlist/0vvXsWCC9xrXsKd4FyS8kM',
+                classical: 'https://open.spotify.com/playlist/37i9dQZF1DWWEJlAGA9gs0',
+                ambient: 'https://open.spotify.com/playlist/37i9dQZF1DX3Ogo9pFvBkY',
+                nature: 'https://open.spotify.com/playlist/37i9dQZF1DXbHcQpOiXk1D',
+                binaural: 'https://open.spotify.com/playlist/37i9dQZF1DX7EF8wVZvnya'
+            };
+            
+            if (playlists[playlist]) {
+                window.open(playlists[playlist], '_blank');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setTheme('ocean');
+            updateDisplay();
+            
+            // Initialize stats
+            stats.streak = Math.floor(Math.random() * 7) + 1;
+            stats.productivity = Math.floor(Math.random() * 40) + 60;
+            document.getElementById('streak').textContent = stats.streak;
+            document.getElementById('productivity').textContent = stats.productivity + '%';
+        });
+    </script>
+</body>
+</html>
